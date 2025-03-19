@@ -4,7 +4,8 @@ import Button from 'react-bootstrap/Button';
 import Modal from 'react-bootstrap/Modal';
 import Form from 'react-bootstrap/Form';
 import { toast } from 'react-toastify';
-import { addCategory, deleteVideoCategory, getAllCategories } from '../services/allApi';
+import { addCategory, deleteVideoCategory, getAllCategories, getVideoDetailsById, updateCategory } from '../services/allApi';
+import VideoCard from './VideoCard';
 
 function Category() {
   const [show, setShow] = useState(false);
@@ -46,6 +47,28 @@ function Category() {
     await deleteVideoCategory(id);
     getCategories()
   }
+  const dragOver=(e)=>{
+    e.preventDefault();
+    console.log("inside dragOver");
+    getCategories()
+    
+  }
+  const videoDropped= async(e,id)=>{
+    console.log(`dropped inside category with ID ${id}`);
+    const vId=e.dataTransfer.getData('videoId');
+    console.log(`video with id ${vId} is dropped in Category with Id ${id}`);
+    const result=await getVideoDetailsById(vId)
+    console.log(result);
+    const {data} =result;
+    let selectedCategory = categories?.find((item=>item.id==id));
+    console.log("Selected category")
+    console.log(selectedCategory);
+    selectedCategory.allVideos.push(data);
+    console.log("final category");
+    console.log(selectedCategory);
+    const result_new=await updateCategory(id,selectedCategory)
+    
+  }
   return (
 
     <>
@@ -79,11 +102,22 @@ function Category() {
       </Modal>
       {
         categories?.map((item) => (
-          <div className='border border-secondary rounded p-3 m-5'>
+          <div className='border border-secondary rounded p-3 m-5' droppable 
+          onDragOver={(e)=>dragOver(e)}
+          onDrop={(e)=>videoDropped(e,item.id)}
+          >
             <div className='d-flex justify-content-between align-items-center'>
               <h6>{item.categoryName}</h6>
               <button className='btn btn-danger' onClick={(e) => deleteCategory(item.id)}><i class="fa-solid fa-trash"></i></button>
+              
             </div>
+            {
+                item.allVideos.length> 0 ?
+                item.allVideos.map(video=>(
+                  <img src={video.thumbnailUrl} alt="" height={'200px'} width={'100%'} className='mt-3 p-2' />
+                )):
+                <p>No item found</p>
+              }
           </div>
         ))
       }

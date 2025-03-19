@@ -43,9 +43,13 @@ function VideoCard({displayVideo,setDeleteVideoStatus}) {
    
    
   }
+  const dragStarted=(e,id)=>{
+      console.log(`video with ${id} started dragging`)
+      e.dataTransfer.setData("videoId",id)
+  }
   return (
     <>
-     <Card style={{ width: '18rem' }}>
+     <Card style={{ width: '18rem' }} draggable onDragStart={(e)=>dragStarted(e,displayVideo.id)}>
       <Card.Img variant="top" src={displayVideo.thumbnailUrl}
       onClick={handleShow}
       />
